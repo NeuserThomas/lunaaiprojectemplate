@@ -2,35 +2,37 @@ from mlflow.pyfunc import PythonModel, PythonModelContext
 from luna.lunaUtils import LunaUtils
 from azureml.contrib.services.aml_response import AMLResponse
 import json
+from sklearn.linear_model import LogisticRegression
+import pandas as pd
+import json
+import os
+import pickle
+import requests
+
+from luna.numpyJsonEncoder import NumpyJSONEncoder
 
 
 class LunaPythonModel(PythonModel):
     def load_context(self, context):
-        ## DO NOT CHANGE! Set mlflow as default run mode
         if (self._run_mode != 'azureml'):
             self._run_mode = 'mlflow'
 
         ## DO NOT CHANGE! Get the model path
         model_path = LunaUtils.GetModelPath(run_mode = self._run_mode, context = context)
-        
-        # This function will only be called if user deploy the model to a real time service endpoint
-        # This function will be called every time when the container instance is started
-        # DO NOT use context otherwise it won't work on Azure ML
-        # You model is the following directory: model_path/<model_path you specified in train method>
 
+        model_file = os.path.join(model_path, 'models/model.pkl')
+        self._model = pickle.load( open( model_file, "rb" ) )
         return
 
     def predict(self, context, model_input):
-        ## DO NOT CHANGE! Get the model path
+       ## DO NOT CHANGE! Get the model path
         model_path = LunaUtils.GetModelPath(run_mode = self._run_mode, context = context)
-        
-        # Add your scoring code here. You model is the following directory: model_path/<model_path you specified in train method>
-        # DO NOT use context otherwise it won't work on Azure ML
-        # Update the scoring_result with the real result
-        
+                
         user_input = json.loads(model_input)
-        
-        scoring_result = json.dumps({"result": ""})
+
+        scoring_result = {"result": self._model.predict(user_input["records"])}
+
+        scoring_result = json.dumps(scoring_result, cls=NumpyJSONEncoder)
         return AMLResponse(scoring_result, 200)
 
     def train(self, args, user_input, logger):  
@@ -47,8 +49,21 @@ class LunaPythonModel(PythonModel):
         # 3. Upload a file or artifact: logger.upload_artifacts(local_file_name, upload_file_name)
         # 4. Upload files or artifacts: logger.upload_artifacts(local_directory_name, upload_directory_name)
 
-        model_path = "models"
-        description = "this is my model"
+        train_data = pd.read_csv(user_input["trainingDataSource"])
+
+        label_column_name = user_input['labelColumnName'] if 'labelColumnName' in user_input else train_data.columns[-1]
+        description = user_input['description'] if 'description' in user_input else 'this is my model description'
+
+        X = train_data.drop([label_column_name], axis=1)
+
+        Y = train_data[label_column_name]
+
+        log_reg = LogisticRegression()
+        log_reg.fit(X, Y)
+
+        model_path = 'models'
+        model_file = os.path.join(model_path, "model.pkl")
+        pickle.dump(log_reg, open(model_file, 'wb'))
 
         return model_path, description
 
@@ -63,6 +78,27 @@ class LunaPythonModel(PythonModel):
         # 3. Upload a file or artifact: logger.upload_artifacts(local_file_name, upload_file_name)
         # 4. Upload files or artifacts: logger.upload_artifacts(local_directory_name, upload_directory_name)
         
+
+        data = pd.read_csv(user_input["dataSource"])
+        output_filename = user_input["output"]
+
+        model_file = os.path.join(model_path, "models", "model.pkl")
+        model = pickle.load(open(model_file, 'rb'))
+
+        y_proba = model.predict(data)
+
+        temp_filename = "imputation_result.csv"
+        with open(temp_filename, "wt") as temp_file:
+            pd.DataFrame(y_proba).to_csv(temp_file, header=False)
+
+        with open(temp_filename , 'rb') as fh:
+            response = requests.put(output_filename,
+                                data=fh,
+                                headers={
+                                            'content-type': 'text/csv',
+                                            'x-ms-blob-type': 'BlockBlob'
+                                        }
+                                )
 
         return
 

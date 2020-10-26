@@ -19,6 +19,7 @@ dependencies:
   - inference-schema[numpy-support]
   - mlflow
   - azureml-contrib-services
+  - sklearn
   # Add pip packages used in your project
 channels:
 - conda-forge
