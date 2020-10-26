@@ -1,0 +1,10 @@
+{
+    "training_user_input": {
+    },
+    "batch_inference_input": {
+    },
+    "real_time_scoring_input": {
+    },
+    "real_time_scoring_expected_output": {
+    }
+}

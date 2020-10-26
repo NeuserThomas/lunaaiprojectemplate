@@ -1,0 +1,4 @@
+{
+    "trainingDataSource": "https://xiwutestai.blob.core.windows.net/lunav2/iris/iris.csv?st=2020-07-22T17%3A19%3A10Z&se=2027-10-12T17%3A19%3A00Z&sp=rl&sv=2018-03-28&sr=b&sig=7c%2BaoI8QtdepDHKqJqjjljdBUyDyuL8wbKol2Kn7xaI%3D",
+    "description": "Iris prediction"
+}

@@ -1,0 +1,6 @@
+{
+    "spark_version": "5.5.x-scala2.11",
+    "node_type_id": "i3.xlarge",
+    "aws_attributes": {"availability": "ON_DEMAND"},
+    "num_workers": 4
+}

@@ -1,0 +1,35 @@
+kubernetes:
+  cpu_cores: 0.5
+  memory_gb: 1
+  gpu_cores: 0
+  autoscale_enabled: true
+  autoscale_min_replicas: 1
+  autoscale_max_replicas: 10
+  autoscale_refresh_seconds: 1
+  autoscale_target_utilization: 70
+  collect_model_data: false
+  auth_enabled: true
+  enable_app_insights: false
+  scoring_timeout_ms: 60000
+  max_request_wait_time: 500
+  num_replicas:
+  properties: 
+  period_seconds: 10
+  initial_delay_seconds: 310
+  timeout_seconds: 2
+  success_threshold: 1
+  failure_threshold: 3
+  token_auth_enabled: false
+azureContainerInstance:
+  cpu_cores: 1
+  memory_gb: 1
+  properties: 
+  location:
+  auth_enabled: true
+  collect_model_data: false
+  enable_app_insights: false
+  vnet_name:
+  subnet_name:
+
+
+

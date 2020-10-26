@@ -1,0 +1,69 @@
+name: EDDI
+
+conda_env: conda.yml
+# Can have a docker_env instead of a conda_env, e.g.
+# docker_env:
+#    image:  mlflow-docker-example
+
+entry_points:
+  train:
+    parameters:
+      runMode: {type: string, default: 'default'}
+      userInput: {type: string, default: '{}'}
+      userId: {type: string, default: 'default'}
+      operationId: {type: string, default: 'default'}
+      predecessorOperationId: {type: string, default: 'default'}
+      productName: {type: string, default: 'default'}
+      deploymentName: {type: string, default: 'default'}
+      apiVersion: {type: string, default: 'default'}
+      subscriptionId: {type: string, default: 'default'}
+    description: "Train a model"
+    type: root
+    successors: 
+      - batchinference
+      - deploy
+    verb: train
+    noun: models
+    noun_single: model
+    output: model
+    command: "python src/luna_publish/train.py --runMode {runMode} --userInput {userInput} --userId {userId} --operationId {operationId} --predecessorOperationId {predecessorOperationId} --productName {productName} --deploymentName {deploymentName} --apiVersion {apiVersion} --subscriptionId {subscriptionId}"
+  batchinference:
+    parameters:
+      runMode: {type: string, default: 'default'}
+      userInput: {type: string, default: '{}'}
+      userId: {type: string, default: 'default'}
+      operationId: {type: string, default: 'default'}
+      predecessorOperationId: {type: string, default: 'default'}
+      productName: {type: string, default: 'default'}
+      deploymentName: {type: string, default: 'default'}
+      apiVersion: {type: string, default: 'default'}
+      subscriptionId: {type: string, default: 'default'}
+    description: "Batch inference using a model."
+    type: child
+    successors:
+    verb: batchinference
+    noun: inferenceresults
+    noun_single: inferenceresult
+    output: none
+    command: "python src/luna_publish/batchinference.py --runMode {runMode} --userInput {userInput} --userId {userId} --operationId {operationId} --predecessorOperationId {predecessorOperationId} --productName {productName} --deploymentName {deploymentName} --apiVersion {apiVersion} --subscriptionId {subscriptionId}"
+  deploy:
+    parameters:
+      runMode: {type: string, default: 'default'}
+      userInput: {type: string, default: '{}'}
+      userId: {type: string, default: 'default'}
+      operationId: {type: string, default: 'default'}
+      predecessorOperationId: {type: string, default: 'default'}
+      productName: {type: string, default: 'default'}
+      deploymentName: {type: string, default: 'default'}
+      apiVersion: {type: string, default: 'default'}
+      subscriptionId: {type: string, default: 'default'}
+      deploymentTarget: {type: string, default: 'default'}
+      aksCluster: {type: string, default: 'default'}
+    description: "Deploy a model to a service endpoint."
+    type: child
+    successors:
+    verb: deploy
+    noun: endpoints
+    noun_single: endpoint
+    output: endpoint
+    command: "python src/luna_publish/deploy.py --runMode {runMode} --userInput {userInput} --userId {userId} --operationId {operationId} --predecessorOperationId {predecessorOperationId} --productName {productName} --deploymentName {deploymentName} --apiVersion {apiVersion} --subscriptionId {subscriptionId}"

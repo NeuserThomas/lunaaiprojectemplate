@@ -1,0 +1,7 @@
+{
+    "Id":null,
+    "Scope":"/subscriptions/a6c2a7cc-d67e-4a1a-b765-983f08c0423a/resourceGroups/xiwutest/providers/Microsoft.MachineLearningServices/workspaces/xiwutest",
+    "AmlCompute":"lunaamlcompute",
+    "DeploymentTarget":"aks",
+    "AksCluster":"lunaaks"
+ }
